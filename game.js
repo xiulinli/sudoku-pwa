@@ -15,6 +15,7 @@ class SudokuGame {
             expert: { holes: 55, time: 1200 }
         };
         this.notes = Array(81).fill(null).map(() => new Set());
+        this.gameWon = false;
         this.init();
     }
 
@@ -40,6 +41,9 @@ class SudokuGame {
         document.getElementById('hintBtn').addEventListener('click', () => this.provideHint());
         document.getElementById('noteModeBtn').addEventListener('click', () => this.toggleNoteMode());
         document.getElementById('resetBtn').addEventListener('click', () => this.resetGame());
+
+        document.getElementById('nextLevelBtn').addEventListener('click', () => this.nextLevel());
+        document.getElementById('backBtn').addEventListener('click', () => this.backToMain());
 
         document.querySelectorAll('.num-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
@@ -77,6 +81,7 @@ class SudokuGame {
         this.stopTimer();
         this.seconds = 0;
         this.updateTimerDisplay();
+        this.gameWon = false;
         this.generatePuzzle();
         this.renderBoard();
         this.startTimer();
@@ -303,6 +308,8 @@ class SudokuGame {
     }
 
     checkWin() {
+        if (this.gameWon) return;
+        
         for (let i = 0; i < 9; i++) {
             for (let j = 0; j < 9; j++) {
                 if (this.board[i][j] !== this.solution[i][j]) {
@@ -310,8 +317,10 @@ class SudokuGame {
                 }
             }
         }
+        console.log('Win detected!');
+        this.gameWon = true;
         this.stopTimer();
-        this.showMessage('恭喜！你成功完成了数独！', 'success');
+        this.showWinModal();
         return true;
     }
 
@@ -345,6 +354,41 @@ class SudokuGame {
     hideMessage() {
         const messageElement = document.getElementById('message');
         messageElement.className = 'message';
+    }
+
+    showWinModal() {
+        console.log('showWinModal called');
+        const modal = document.getElementById('winModal');
+        console.log('modal element:', modal);
+        if (modal) {
+            modal.classList.add('show');
+            console.log('modal classes after add:', modal.className);
+        } else {
+            console.error('Modal element not found!');
+        }
+    }
+
+    hideWinModal() {
+        const modal = document.getElementById('winModal');
+        modal.classList.remove('show');
+    }
+
+    nextLevel() {
+        this.hideWinModal();
+        if (this.level < 30) {
+            this.level++;
+            document.getElementById('level').value = this.level;
+            this.startNewGame();
+        } else {
+            this.showMessage('恭喜！你已经完成了所有关卡！', 'success');
+        }
+    }
+
+    backToMain() {
+        this.hideWinModal();
+        this.level = 1;
+        document.getElementById('level').value = 1;
+        this.startNewGame();
     }
 }
 
